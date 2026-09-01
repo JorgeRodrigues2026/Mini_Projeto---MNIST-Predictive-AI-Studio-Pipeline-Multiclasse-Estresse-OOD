@@ -1,5 +1,29 @@
 # 🧠 MNIST Predictive AI Studio: Pipeline Multiclasse & Estresse OOD
 
+Estrutura do Projeto:
+```text
+mnist_predictive_system/
+|
+|-- data/
+|   |-- raw/                 # Dados baixados (MNIST)
+|   \-- custom_digits/       # Imagens 28x28 PNG de 0 a 9 geradas para teste
+|
+|-- notebooks/
+|   \-- mnist_analysis.ipynb # Jupyter Notebook completo (Fases 1 a 5)
+|
+|-- src/
+|   |-- __init__.py
+|   |-- data_loader.py       # Carregamento e particionamento estratificado
+|   |-- preprocessing.py     # Pipeline de normalização, centralização de massa e recorte
+|   |-- models.py            # Treinamento e avaliação (RF, SVM, MLP/Deep Learning)
+|   |-- ood_stress.py        # Experimento de Class Masking e Análise de Falsa Certeza
+|   \-- digit_generator.py   # Gerador de imagens sintéticas/PNG 28x28
+|
+|-- app.py                   # Dashboard Interativo em Streamlit
+|-- generate_test_digits.py  # Script CLI para gerar o lote de imagens 0-9 em .PNG
+|-- requirements.txt         # Dependências do projeto
+\-- README.md                # Documentação completa com roteiro Git e Script do Vídeo
+
 Sistema preditivo completo de ponta a ponta desenvolvido em Python, com interface analítica em **Streamlit**, **Jupyter Notebook**, modelos clássicos e Redes Neurais profundas para classificação de dígitos manuscritos (**MNIST_784**), avaliação de robustez fora da distribuição (**Out-of-Distribution / Overconfidence**) e inferência em imagens do mundo real.
 
 ---
@@ -33,3 +57,4 @@ python -m venv venv
 venv\Scripts\activate
 # No Linux/Mac:
 source venv/bin/activate
+
