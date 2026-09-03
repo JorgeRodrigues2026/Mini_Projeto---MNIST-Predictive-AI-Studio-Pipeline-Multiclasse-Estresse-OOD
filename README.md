@@ -58,3 +58,35 @@ venv\Scripts\activate
 # No Linux/Mac:
 source venv/bin/activate
 
+---
+
+## 🖥️ Apresentação Executiva & Demonstração Interativa
+
+Apresentação técnica com dashboard interativo em glassmorphism moderno, consolidando a análise exploratória de dados, benchmarks comparativos e os testes de estresse OOD:
+
+* 🌐 **Acessar Apresentação Online:** [Visualizar Apresentação Interativa (GitHub Pages)](https://jorgerodrigues2026.github.io/Mini_Projeto---MNIST-Predictive-AI-Studio-Pipeline-Multiclasse-Estresse-OOD/)
+* 🎥 **Vídeo Explicativo do Projeto (Drive):** `[INSERIR_AQUI_O_LINK_DO_SEU_GOOGLE_DRIVE]`
+
+---
+
+### 📊 Benchmark Consolidado de Desempenho (Conjunto de Teste)
+
+| Modelo | Acurácia Global | Precisão Ponderada | Recall Ponderado | F1-Score | Tempo de Treino |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **SVM (Kernel RBF)** | **97,19%** | 0.9719 | 0.9719 | 0.9719 | 140.37s |
+| **MLP (Rede Neural Profunda)** | **96,48%** | 0.9648 | 0.9648 | 0.9648 | 27.16s |
+| **Random Forest** | **95,31%** | 0.9530 | 0.9531 | 0.9530 | **4.35s** |
+
+> **Diagnóstico Técnico de Erros & Fronteiras:**
+> * **Erros Morfológicos Críticos:** Ambiguidade recorrente nos pares **4 vs 9** (fechamento superior incompleto), **3 vs 5** e **3 vs 8** (sobreposição de concavidades e curvaturas).
+> * **Trade-off Computacional:** O **SVM RBF** alcança a fronteira de decisão ideal em acurácia, mas escala de modo quadrático $\mathcal{O}(N^2)$ em custo amostral; o **MLP** entrega alta flexibilidade com inferência escalável; o **Random Forest** oferece altíssima velocidade para cenários com baixa latência operacional[cite: 1].
+
+---
+
+### 🧪 Testes de Estresse, Robustez & Generalização Extrema (Fase 5)[cite: 1]
+
+* **Fase 5.1 — Class Masking:** Treinamento restrito suprimindo intencionalmente os dígitos 4 e 7[cite: 1].
+* **Fase 5.2 — Inferência OOD & Overconfidence:** Validação da resiliência preditiva sobre classes nunca vistas durante o ajuste de pesos[cite: 1]. A dispersão entrópica evitou falsas certezas absolutas, demonstrando capacidade de detecção de novidade[cite: 1].
+* **Fase 5.3 — Inferência com Imagens Próprias (OpenCV):** Digitalização e pipeline de pré-processamento (escala de cinza, inversão bitwise, reenquadramento de centro de massa e normalização para $[0.0, 1.0]$), resultando na classificação correta e consistente do traço manuscrito[cite: 1].
+
+---
