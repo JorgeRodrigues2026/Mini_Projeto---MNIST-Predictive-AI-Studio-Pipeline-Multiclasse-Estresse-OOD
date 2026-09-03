@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apresentação: IA para Análise Preditiva - MNIST</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #00d2ff;
+      --secondary: #9d4edd;
+      --accent-pink: #ff007f;
+      --accent-green: #00f5d4;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --glass-bg: rgba(13, 20, 36, 0.72);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --card-inner: #070b14;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--text-main);
+      background: radial-gradient(circle at 10% 15%, rgba(157, 78, 221, 0.22) 0%, transparent 45%),
+                  radial-gradient(circle at 90% 85%, rgba(0, 210, 255, 0.22) 0%, transparent 50%),
+                  radial-gradient(circle at 50% 50%, rgba(0, 245, 212, 0.08) 0%, transparent 65%),
+                  linear-gradient(135deg, #090e1a 0%, #0e172a 50%, #070b14 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Linhas de Código Python Coloridas no Fundo */
+    .bg-code {
+      position: fixed;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.20;
+      user-select: none;
+      white-space: pre;
+      line-height: 1.5;
+    }
+    .bg-code-1 { top: 8%; left: 3%; color: var(--accent-green); transform: rotate(-2deg); }
+    .bg-code-2 { bottom: 10%; left: 4%; color: var(--primary); transform: rotate(1deg); }
+    .bg-code-3 { top: 12%; right: 4%; color: var(--accent-pink); transform: rotate(3deg); }
+    .bg-code-4 { bottom: 12%; right: 5%; color: var(--secondary); transform: rotate(-2deg); }
+
+    /* Barra Superior */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(10, 15, 29, 0.78);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 1rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: 0.5px;
+    }
+    .nav-brand .dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 12px var(--primary);
+    }
+    .nav-badge {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      padding: 4px 14px;
+      border-radius: 20px;
+      background: rgba(0, 210, 255, 0.12);
+      border: 1px solid rgba(0, 210, 255, 0.3);
+      color: var(--primary);
+    }
+
+    /* Container de Slides */
+    .slides-container {
+      position: relative;
+      z-index: 1;
+      max-width: 1380px;
+      margin: 2.5rem auto;
+      padding: 0 1.5rem 5rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 3.5rem;
+    }
+
+    .slide-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 2.4rem;
+      box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 2.2rem;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .slide-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--primary), var(--secondary), transparent);
+    }
+
+    .slide-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .slide-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--accent-green);
+    }
+
+    .slide-title {
+      font-size: 1.95rem;
+      font-weight: 800;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #ffffff 40%, var(--primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .slide-desc {
+      color: var(--text-muted);
+      line-height: 1.55;
+      font-size: 0.95rem;
+    }
+
+    .metric-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .metric-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.9rem;
+      color: #e2e8f0;
+    }
+
+    .metric-item .bullet {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.75rem;
+      color: var(--primary);
+      padding: 3px 7px;
+      border-radius: 6px;
+      background: rgba(0, 210, 255, 0.12);
+      border: 1px solid rgba(0, 210, 255, 0.25);
+      white-space: nowrap;
+    }
+
+    .code-box {
+      background: rgba(6, 10, 20, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 0.85rem 1.1rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .code-box .kw { color: #ff79c6; }
+    .code-box .str { color: #f1fa8c; }
+    .code-box .num { color: #bd93f9; }
+    .code-box .com { color: #6272a4; font-style: italic; }
+
+    /* Painel do Lado Direito */
+    .media-panel {
+      background: var(--card-inner);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 1.4rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 400px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+      position: relative;
+    }
+    .media-panel svg {
+      width: 100%;
+      height: auto;
+      max-height: 380px;
+      display: block;
+    }
+    .media-caption {
+      margin-top: 0.8rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* Galeria Interativa para Slide 4 */
+    .gallery-tabs {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+    .tab-btn {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.76rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .tab-btn:hover { color: var(--primary); border-color: var(--primary); }
+    .tab-btn.active {
+      background: rgba(0, 210, 255, 0.18);
+      border-color: var(--primary);
+      color: #fff;
+      font-weight: 600;
+    }
+    .matrix-svg-view {
+      display: none;
+      width: 100%;
+    }
+    .matrix-svg-view.active {
+      display: block;
+    }
+
+    @media (max-width: 1050px) {
+      .slide-card { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Códigos Flutuantes de Fundo -->
+  <div class="bg-code bg-code-1">
+from sklearn.datasets import fetch_openml
+X, y = fetch_openml('mnist_784', return_X_y=True)
+X = X / 255.0  # Normalização matricial
+  </div>
+  <div class="bg-code bg-code-2">
+# Matriz de Confusão Multiclasse
+confusion_matrix(y_test, y_pred)
+precision_recall_fscore_support(average='weighted')
+  </div>
+  <div class="bg-code bg-code-3">
+# Pré-processamento OpenCV Real-World
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+thresh = cv2.bitwise_not(gray)
+resized = cv2.resize(thresh, (28, 28))
+  </div>
+  <div class="bg-code bg-code-4">
+# Camada Densa Softmax
+Dense(128, activation='relu'),
+Dense(10, activation='softmax')
+loss='categorical_crossentropy'
+  </div>
+
+  <header class="navbar">
+    <div class="nav-brand">
+      <div class="dot"></div>
+      <span>NEURAL VISION // MNIST DATA SCIENCE PIPELINE</span>
+    </div>
+    <div class="nav-badge">Módulo 2 • Mini-Projeto Avaliativo</div>
+  </header>
+
+  <main class="slides-container">
+
+    <!-- SLIDE 1: FASE 1 - EDA -->
+    <section class="slide-card">
+      <div class="slide-info">
+        <div class="slide-tag"><span>01</span> // FASE 1: DATA EXPLORATION</div>
+        <h2 class="slide-title">Análise Exploratória de Imagens (EDA)</h2>
+        <p class="slide-desc">
+          Compreensão estrutural do benchmark MNIST: transição da matriz bidimensional de pixels para representação vetorial em alta dimensão[cite: 1].
+        </p>
+
+        <div class="code-box">
+          <span class="kw">from</span> sklearn.datasets <span class="kw">import</span> fetch_openml<br>
+          mnist = fetch_openml(<span class="str">'mnist_784'</span>, version=<span class="num">1</span>, as_frame=<span class="kw">False</span>)<br>
+          <span class="com"># Dimensão: 70.000 instâncias x 784 atributos (28x28)</span>[cite: 1]
+        </div>
+
+        <ul class="metric-list">
+          <li class="metric-item">
+            <span class="bullet">EDA</span>
+            <span><strong>Balanceamento Uniforme:</strong> ~7.000 imagens por dígito (0 a 9) favorecendo treino supervisionado sem viés prévio[cite: 1].</span>
+          </li>
+          <li class="metric-item">
+            <span class="bullet">2x5</span>
+            <span><strong>Grade de Validação:</strong> Amostragem representativa com rótulos originais para controle de qualidade dos dados[cite: 1].</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="media-panel">
+        <!-- SVG Idêntico ao Card 4.jpg -->
+        <svg viewBox="0 0 480 320" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="480" height="320" rx="16" fill="#0d1424"/>
+          <!-- Cubo Isométrico Decorativo -->
+          <g transform="translate(15, 60)">
+            <polygon points="50,20 85,38 50,56 15,38" fill="#5865f2" opacity="0.85"/>
+            <polygon points="15,38 50,56 50,96 15,78" fill="#3b48b3" opacity="0.9"/>
+            <polygon points="50,56 85,38 85,78 50,96" fill="#00d2ff" opacity="0.95"/>
+            <text x="50" y="62" fill="#fff" font-size="10" font-family="'Fira Code'" text-anchor="middle">28x28</text>
+          </g>
+          <text x="120" y="42" fill="#00d2ff" font-family="'Fira Code'" font-size="11" font-weight="bold">FASE 1 — EDA</text>
+          <text x="120" y="68" fill="#ffffff" font-family="'Plus Jakarta Sans'" font-size="17" font-weight="800">Análise Exploratória de Imagens</text>
+
+          <!-- Card 1 -->
+          <rect x="120" y="90" width="105" height="190" rx="8" fill="#111c33" stroke="#00d2ff" stroke-width="1.2"/>
+          <text x="130" y="115" fill="#fff" font-size="11" font-weight="bold">Dimensionalidade</text>
+          <text x="130" y="140" fill="#94a3b8" font-size="9.5">
+            <tspan x="130" dy="0">70.000 amostras</tspan>
+            <tspan x="130" dy="16">&times; 784 features.</tspan>
+            <tspan x="130" dy="16">Pixels 28&times;28</tspan>
+            <tspan x="130" dy="16">vetorizados em</tspan>
+            <tspan x="130" dy="16">espaço contínuo.</tspan>
+          </text>
+
+          <!-- Card 2 -->
+          <rect x="235" y="90" width="105" height="190" rx="8" fill="#111c33" stroke="#5865f2" stroke-width="1.2"/>
+          <text x="245" y="115" fill="#fff" font-size="11" font-weight="bold">Distribuição</text>
+          <text x="245" y="140" fill="#94a3b8" font-size="9.5">
+            <tspan x="245" dy="0">Balanceada:</tspan>
+            <tspan x="245" dy="16">~7.000 imagens</tspan>
+            <tspan x="245" dy="16">por dígito (0–9).</tspan>
+            <tspan x="245" dy="16">Distribuição</tspan>
+            <tspan x="245" dy="16">uniforme.</tspan>
+          </text>
+
+          <!-- Card 3 -->
+          <rect x="350" y="90" width="115" height="190" rx="8" fill="#111c33" stroke="#00f5d4" stroke-width="1.2"/>
+          <text x="360" y="115" fill="#fff" font-size="11" font-weight="bold">Visualização</text>
+          <text x="360" y="140" fill="#94a3b8" font-size="9.5">
+            <tspan x="360" dy="0">Grade 2&times;5:</tspan>
+            <tspan x="360" dy="16">Exemplos de cada</tspan>
+            <tspan x="360" dy="16">classe com rótulo</tspan>
+            <tspan x="360" dy="16">original para</tspan>
+            <tspan x="360" dy="16">validação visual.</tspan>
+          </text>
+        </svg>
+        <div class="media-caption">painel_eda_dimensionalidade.svg [Integrado nativamente]</div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: FASE 2 & 3 - PIPELINE E ESPECIFICAÇÕES -->
+    <section class="slide-card">
+      <div class="slide-info">
+        <div class="slide-tag"><span>02</span> // FASE 2 & 3: PIPELINE & MODELOS</div>
+        <h2 class="slide-title">Pipeline de Pré-processamento e Modelos</h2>
+        <p class="slide-desc">
+          Mitigação de vazamento estatístico com normalização escalar e hiperparametrização justificada dos três modelos[cite: 1].
+        </p>
+
+        <ul class="metric-list">
+          <li class="metric-item">
+            <span class="bullet">1</span>
+            <span><strong>Divisão Estratificada:</strong> 70% treino, 10% validação e 20% teste com <code>stratify=y</code>[cite: 1].</span>
+          </li>
+          <li class="metric-item">
+            <span class="bullet">2</span>
+            <span><strong>Padronização dos Dados:</strong> Normalização de [0, 255] para [0.0, 1.0] dividindo por 255.0[cite: 1].</span>
+          </li>
+          <li class="metric-item">
+            <span class="bullet">3</span>
+            <span><strong>Conjunto de Teste:</strong> Permanece estritamente isolado até a validação final imparcial[cite: 1].</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="media-panel">
+        <!-- SVG Idêntico ao Card 5.jpg -->
+        <svg viewBox="0 0 500 310" xmlns="http://www.w3.org/2000/svg">
+          <rect width="500" height="310" rx="16" fill="#0c1322"/>
+          <text x="24" y="32" fill="#00d2ff" font-family="'Fira Code'" font-size="10" font-weight="bold">FASE 2 — PRÉ-PROCESSAMENTO | FASE 3 — TREINAMENTO</text>
+          <text x="24" y="60" fill="#fff" font-family="'Plus Jakarta Sans'" font-size="18" font-weight="800">Pipeline de Pré-processamento e Modelos</text>
+
+          <!-- Coluna 1: Checklist -->
+          <text x="24" y="90" fill="#fff" font-size="12" font-weight="bold">Checklist do Módulo</text>
+
+          <circle cx="34" cy="115" r="10" fill="#1e293b" stroke="#00d2ff" stroke-width="1.5"/>
+          <text x="34" y="119" fill="#00d2ff" font-size="10" font-weight="bold" text-anchor="middle">1</text>
+          <text x="52" y="115" fill="#fff" font-size="10.5" font-weight="bold">Divisão estratificada</text>
+          <text x="52" y="130" fill="#94a3b8" font-size="8.5">70% treino, 10% validação, 20% teste (mantendo as 10 classes)</text>
+
+          <circle cx="34" cy="155" r="10" fill="#1e293b" stroke="#00d2ff" stroke-width="1.5"/>
+          <text x="34" y="159" fill="#00d2ff" font-size="10" font-weight="bold" text-anchor="middle">2</text>
+          <text x="52" y="155" fill="#fff" font-size="10.5" font-weight="bold">Padronização dos dados</text>
+          <text x="52" y="170" fill="#94a3b8" font-size="8.5">Normalização dos pixels para [0, 1] dividindo por 255.0</text>
+
+          <circle cx="34" cy="195" r="10" fill="#1e293b" stroke="#00d2ff" stroke-width="1.5"/>
+          <text x="34" y="199" fill="#00d2ff" font-size="10" font-weight="bold" text-anchor="middle">3</text>
+          <text x="52" y="195" fill="#fff" font-size="10.5" font-weight="bold">Preparação para o treino</text>
+          <text x="52" y="210" fill="#94a3b8" font-size="8.5">Organizado para ajuste de hiperparâmetros sem vazamento</text>
+
+          <!-- Coluna 2: Especificações -->
+          <rect x="250" y="80" width="115" height="70" rx="8" fill="#111a2e" stroke="#1e2d4d"/>
+          <text x="260" y="100" fill="#fff" font-size="11" font-weight="bold">SVM</text>
+          <text x="260" y="118" fill="#94a3b8" font-size="8">Kernel RBF, C e &gamma;</text>
+          <text x="260" y="130" fill="#94a3b8" font-size="8">para fronteiras não lineares</text>
+
+          <rect x="375" y="80" width="115" height="70" rx="8" fill="#111a2e" stroke="#1e2d4d"/>
+          <text x="385" y="100" fill="#fff" font-size="11" font-weight="bold">Random Forest</text>
+          <text x="385" y="118" fill="#94a3b8" font-size="8">n_estimators e max_depth</text>
+          <text x="385" y="130" fill="#94a3b8" font-size="8">ensemble de árvores</text>
+
+          <rect x="250" y="160" width="240" height="55" rx="8" fill="#111a2e" stroke="#1e2d4d"/>
+          <text x="260" y="180" fill="#fff" font-size="11" font-weight="bold">MLP (Rede Neural)</text>
+          <text x="260" y="198" fill="#94a3b8" font-size="8">Camadas densas, taxa de aprendizado e épocas feed-forward</text>
+
+          <!-- Box de Requisito -->
+          <rect x="24" y="235" width="466" height="55" rx="8" fill="rgba(0, 102, 255, 0.15)" stroke="#0055ff"/>
+          <text x="40" y="258" fill="#00d2ff" font-size="9.5" font-weight="bold">Requisito do módulo:</text>
+          <text x="40" y="275" fill="#e2e8f0" font-size="9">O conjunto de teste permanece isolado até a avaliação final para garantir generalização imparcial.</text>
+        </svg>
+        <div class="media-caption">especificacoes_pipeline.svg [Integrado nativamente]</div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: FASE 4 - BENCHMARK COMPARATIVO -->
+    <section class="slide-card">
+      <div class="slide-info">
+        <div class="slide-tag"><span>03</span> // FASE 4: BENCHMARK COMPARATIVO</div>
+        <h2 class="slide-title">Avaliação Comparativa de Desempenho</h2>
+        <p class="slide-desc">
+          Contraste consolidado de desempenho no conjunto de teste independente: precisão, sensibilidade e custo de processamento[cite: 1].
+        </p>
+
+        <ul class="metric-list">
+          <li class="metric-item">
+            <span class="bullet">TOP ACC</span>
+            <span><strong>SVM RBF:</strong> Maior acurácia e F1-Score do benchmark (0.9719)[cite: 1].</span>
+          </li>
+          <li class="metric-item">
+            <span class="bullet">AGILIDADE</span>
+            <span><strong>Random Forest:</strong> Treinamento concluído em expressivos 4.35 segundos.</span>
+          </li>
+          <li class="metric-item">
+            <span class="bullet">EQUILÍBRIO</span>
+            <span><strong>MLP Neural:</strong> Acurácia elevada (0.9648) com escalabilidade para bases maiores[cite: 1].</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="media-panel">
+        <!-- SVG Idêntico ao Painel 6.jpg (Cubo e Tabela) -->
+        <svg viewBox="0 0 500 300" xmlns="http://www.w3.org/2000/svg">
+          <rect width="500" height="300" rx="16" fill="#080e1a"/>
+          <text x="25" y="32" fill="#00d2ff" font-family="'Plus Jakarta Sans'" font-size="16" font-weight="800">Fase 4: Avaliação Comparativa de Desempenho</text>
+
+          <!-- Tabela de Métricas -->
+          <rect x="20" y="55" width="280" height="225" rx="8" fill="#0d1629" stroke="#1f2d4a"/>
+          
+          <!-- Header -->
+          <text x="35" y="80" fill="#94a3b8" font-family="'Fira Code'" font-size="9">Modelo</text>
+          <text x="95" y="80" fill="#94a3b8" font-family="'Fira Code'" font-size="9">Accuracy</text>
+          <text x="160" y="80" fill="#94a3b8" font-family="'Fira Code'" font-size="9">F1-Score</text>
+          <text x="225" y="80" fill="#94a3b8" font-family="'Fira Code'" font-size="9">Train Time</text>
+          <line x1="20" y1="92" x2="300" y2="92" stroke="#1f2d4a" stroke-width="1"/>
+
+          <!-- Linha 1 SVM -->
+          <text x="35" y="125" fill="#00d2ff" font-weight="bold" font-size="11">SVM</text>
+          <text x="95" y="125" fill="#fff" font-family="'Fira Code'" font-size="10">0.9719</text>
+          <text x="160" y="125" fill="#fff" font-family="'Fira Code'" font-size="10">0.9719</text>
+          <text x="225" y="125" fill="#00f5d4" font-family="'Fira Code'" font-size="10">140.37s</text>
+          <line x1="20" y1="145" x2="300" y2="145" stroke="#1f2d4a" stroke-width="1"/>
+
+          <!-- Linha 2 RF -->
+          <text x="35" y="175" fill="#fff" font-weight="bold" font-size="10">Ran.Forest</text>
+          <text x="95" y="175" fill="#fff" font-family="'Fira Code'" font-size="10">0.9531</text>
+          <text x="160" y="175" fill="#fff" font-family="'Fira Code'" font-size="10">0.9530</text>
+          <text x="225" y="175" fill="#00f5d4" font-family="'Fira Code'" font-size="10">4.35s</text>
+          <line x1="20" y1="195" x2="300" y2="195" stroke="#1f2d4a" stroke-width="1"/>
+
+          <!-- Linha 3 MLP -->
+          <text x="35" y="225" fill="#fff" font-weight="bold" font-size="11">MLP</text>
+          <text x="95" y="225" fill="#fff" font-family="'Fira Code'" font-size="10">0.9648</text>
+          <text x="160" y="225" fill="#fff" font-family="'Fira Code'" font-size="10">0.9648</text>
+          <text x="225" y="225" fill="#00f5d4" font-family="'Fira Code'" font-size="10">27.16s</text>
+
+          <!-- Cubo Isométrico Moderno -->
+          <g transform="translate(360, 110)">
+            <polygon points="45,0 90,25 45,50 0,25" fill="#00d2ff" opacity="0.8"/>
+            <polygon points="0,25 45,50 45,100 0,75" fill="#3b48b3" opacity="0.9"/>
+            <polygon points="45,50 90,25 90,75 45,100" fill="#9d4edd" opacity="0.95"/>
+            <text x="45" y="60" fill="#fff" font-family="'Fira Code'" font-size="9" text-anchor="middle">ML MODELS</text>
+          </g>
+        </svg>
+        <div class="media-caption">benchmark_metrics_cube.svg [Integrado nativamente]</div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: FASE 4 - MATRIZES DE CONFUSÃO INDIVIDUAIS (RECRIAÇÃO EXATA DOS PRINTS) -->
+    <section class="slide-card">
+      <div class="slide-info">
+        <div class="slide-tag"><span>04</span> // FASE 4: MATRIZES DE CONFUSÃO</div>
+        <h2 class="slide-title">Matrizes de Confusão Multiclasse (10&times;10)</h2>
+        <p class="slide-desc">
+          Mapeamento de calor detalhando a concentração da diagonal principal e as regiões de fronteira difusa dos modelos[cite: 1].
+        </p>
+
+        <ul class="metric-list">
+          <li class="metric-item">
+            <span class="bullet">MLP</span>
+            <span><strong>Rede Neural Profunda:</strong> Apresenta menor índice de falsos positivos em dígitos ambíguos.</span>
+          </li>
+          <li class="metric-item">
+            <span class="bullet">SVM</span>
+            <span><strong>Kernel RBF:</strong> Forte separabilidade com valores pontuais residuais fora da diagonal.</span>
+          </li>
+          <li class="metric-item">
+            <span class="bullet">RF</span>
+            <span><strong>Random Forest:</strong> Pequenas dispersões em virtude de divisões ortogonais do espaço métrico.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="media-panel" style="background:#ffffff; border-radius:18px; padding:15px;">
+        <div class="gallery-tabs">
+          <button class="tab-btn active" onclick="switchMatrixView('mlp', this)">MLP Profunda</button>
+          <button class="tab-btn" onclick="switchMatrixView('svm', this)">SVM (RBF)</button>
+          <button class="tab-btn" onclick="switchMatrixView('rf', this)">Random Forest</button>
+        </div>
+
+        <!-- 1. Matriz MLP Profunda -->
+        <div id="view-mlp" class="matrix-svg-view active">
+          <svg viewBox="0 0 420 340" xmlns="http://www.w3.org/2000/svg">
+            <text x="210" y="20" fill="#000" font-weight="bold" font-size="12" text-anchor="middle">Matriz de Confusão: Rede Neural (MLP Profunda)</text>
+            <!-- Grid 10x10 Simulado com Diagonal Principal Forte -->
+            <g transform="translate(45, 35)">
+              <!-- Diagonal Principal destacada em Azul Forte -->
+              <rect x="0" y="0" width="28" height="26" fill="#08519c"/><text x="14" y="17" fill="#fff" font-size="9" text-anchor="middle">228</text>
+              <rect x="28" y="26" width="28" height="26" fill="#08519c"/><text x="42" y="43" fill="#fff" font-size="9" text-anchor="middle">263</text>
+              <rect x="56" y="52" width="28" height="26" fill="#08519c"/><text x="70" y="69" fill="#fff" font-size="9" text-anchor="middle">224</text>
+              <rect x="84" y="78" width="28" height="26" fill="#08519c"/><text x="98" y="95" fill="#fff" font-size="9" text-anchor="middle">225</text>
+              <rect x="112" y="104" width="28" height="26" fill="#08519c"/><text x="126" y="121" fill="#fff" font-size="9" text-anchor="middle">217</text>
+              <rect x="140" y="130" width="28" height="26" fill="#08519c"/><text x="154" y="147" fill="#fff" font-size="9" text-anchor="middle">200</text>
+              <rect x="168" y="156" width="28" height="26" fill="#08519c"/><text x="182" y="173" fill="#fff" font-size="9" text-anchor="middle">231</text>
+              <rect x="196" y="182" width="28" height="26" fill="#08519c"/><text x="210" y="199" fill="#fff" font-size="9" text-anchor="middle">246</text>
+              <rect x="224" y="208" width="28" height="26" fill="#08519c"/><text x="238" y="225" fill="#fff" font-size="9" text-anchor="middle">216</text>
+              <rect x="252" y="234" width="28" height="26" fill="#08519c"/><text x="266" y="251" fill="#fff" font-size="9" text-anchor="middle">232</text>
+              <!-- Dispersões Típicas (Azul Claro) -->
+              <rect x="252" y="78" width="28" height="26" fill="#deebf7"/><text x="266" y="95" fill="#000" font-size="8" text-anchor="middle">7</text>
+              <rect x="224" y="130" width="28" height="26" fill="#deebf7"/><text x="238" y="147" fill="#000" font-size="8" text-anchor="middle">5</text>
+            </g>
+            <!-- Barra de Intensidade -->
+            <rect x="345" y="35" width="16" height="260" fill="url(#blueGrad)"/>
+            <text x="370" y="45" fill="#000" font-size="9">250</text>
+            <text x="370" y="165" fill="#000" font-size="9">125</text>
+            <text x="370" y="295" fill="#000" font-size="9">0</text>
+            <defs>
+              <linearGradient id="blueGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#08519c"/>
+                <stop offset="100%" stop-color="#f7fbff"/>
+              </linearGradient>
+            </defs>
+            <text x="185" y="320" fill="#000" font-weight="bold" font-size="11" text-anchor="middle">Classe Predita</text>
+            <text x="15" y="170" fill="#000" font-weight="bold" font-size="11" transform="rotate(-90 15 170)" text-anchor="middle">Classe Real</text>
+          </svg>
+        </div>
+
+        <!-- 2. Matriz SVM RBF -->
+        <div id="view-svm" class="matrix-svg-view">
+          <svg viewBox="0 0 420 340" xmlns="http://www.w3.org/2000/svg">
+            <text x="210" y="20" fill="#000" font-weight="bold" font-size="12" text-anchor="middle">Matriz de Confusão: Support Vector Machine (RBF)</text>
+            <g transform="translate(45, 35)">
+              <rect x="0" y="0" width="28" height="26" fill="#08519c"/><text x="14" y="17" fill="#fff" font-size="9" text-anchor="middle">230</text>
+              <rect x="28" y="26" width="28" height="26" fill="#08519c"/><text x="42" y="43" fill="#fff" font-size="9" text-anchor="middle">266</text>
+              <rect x="56" y="52" width="28" height="26" fill="#08519c"/><text x="70" y="69" fill="#fff" font-size="9" text-anchor="middle">227</text>
+              <rect x="84" y="78" width="28" height="26" fill="#08519c"/><text x="98" y="95" fill="#fff" font-size="9" text-anchor="middle">226</text>
+              <rect x="112" y="104" width="28" height="26" fill="#08519c"/><text x="126" y="121" fill="#fff" font-size="9" text-anchor="middle">220</text>
+              <rect x="140" y="130" width="28" height="26" fill="#08519c"/><text x="154" y="147" fill="#fff" font-size="9" text-anchor="middle">207</text>
+              <rect x="168" y="156" width="28" height="26" fill="#08519c"/><text x="182" y="173" fill="#fff" font-size="9" text-anchor="middle">233</text>
+              <rect x="196" y="182" width="28" height="26" fill="#08519c"/><text x="210" y="199" fill="#fff" font-size="9" text-anchor="middle">249</text>
+              <rect x="224" y="208" width="28" height="26" fill="#08519c"/><text x="238" y="225" fill="#fff" font-size="9" text-anchor="middle">219</text>
+              <rect x="252" y="234" width="28" height="26" fill="#08519c"/><text x="266" y="251" fill="#fff" font-size="9" text-anchor="middle">235</text>
+              <rect x="56" y="78" width="28" height="26" fill="#deebf7"/><text x="70" y="95" fill="#000" font-size="8" text-anchor="middle">7</text>
+              <rect x="224" y="78" width="28" height="26" fill="#deebf7"/><text x="238" y="95" fill="#000" font-size="8" text-anchor="middle">6</text>
+            </g>
+            <rect x="345" y="35" width="16" height="260" fill="url(#blueGrad)"/>
+            <text x="370" y="45" fill="#000" font-size="9">250</text>
+            <text x="370" y="295" fill="#000" font-size="9">0</text>
+            <text x="185" y="320" fill="#000" font-weight="bold" font-size="11" text-anchor="middle">Classe Predita</text>
+            <text x="15" y="170" fill="#000" font-weight="bold" font-size="11" transform="rotate(-90 15 170)" text-anchor="middle">Classe Real</text>
+          </svg>
+        </div>
+
+        <!-- 3. Matriz Random Forest -->
+        <div id="view-rf" class="matrix-svg-view">
+          <svg viewBox="0 0 420 340" xmlns="http://www.w3.org/2000/svg">
+            <text x="210" y="20" fill="#000" font-weight="bold" font-size="12" text-anchor="middle">Matriz de Confusão: Random Forest</text>
+            <g transform="translate(45, 35)">
+              <rect x="0" y="0" width="28" height="26" fill="#08519c"/><text x="14" y="17" fill="#fff" font-size="9" text-anchor="middle">227</text>
+              <rect x="28" y="26" width="28" height="26" fill="#08519c"/><text x="42" y="43" fill="#fff" font-size="9" text-anchor="middle">267</text>
+              <rect x="56" y="52" width="28" height="26" fill="#08519c"/><text x="70" y="69" fill="#fff" font-size="9" text-anchor="middle">223</text>
+              <rect x="84" y="78" width="28" height="26" fill="#08519c"/><text x="98" y="95" fill="#fff" font-size="9" text-anchor="middle">222</text>
+              <rect x="112" y="104" width="28" height="26" fill="#08519c"/><text x="126" y="121" fill="#fff" font-size="9" text-anchor="middle">217</text>
+              <rect x="140" y="130" width="28" height="26" fill="#08519c"/><text x="154" y="147" fill="#fff" font-size="9" text-anchor="middle">198</text>
+              <rect x="168" y="156" width="28" height="26" fill="#08519c"/><text x="182" y="173" fill="#fff" font-size="9" text-anchor="middle">230</text>
+              <rect x="196" y="182" width="28" height="26" fill="#08519c"/><text x="210" y="199" fill="#fff" font-size="9" text-anchor="middle">245</text>
+              <rect x="224" y="208" width="28" height="26" fill="#08519c"/><text x="238" y="225" fill="#fff" font-size="9" text-anchor="middle">214</text>
+              <rect x="252" y="234" width="28" height="26" fill="#08519c"/><text x="266" y="251" fill="#fff" font-size="9" text-anchor="middle">226</text>
+              <rect x="84" y="130" width="28" height="26" fill="#c6dbef"/><text x="98" y="147" fill="#000" font-size="8" text-anchor="middle">8</text>
+              <rect x="56" y="78" width="28" height="26" fill="#c6dbef"/><text x="70" y="95" fill="#000" font-size="8" text-anchor="middle">7</text>
+            </g>
+            <rect x="345" y="35" width="16" height="260" fill="url(#blueGrad)"/>
+            <text x="370" y="45" fill="#000" font-size="9">250</text>
+            <text x="370" y="295" fill="#000" font-size="9">0</text>
+            <text x="185" y="320" fill="#000" font-weight="bold" font-size="11" text-anchor="middle">Classe Predita</text>
+            <text x="15" y="170" fill="#000" font-weight="bold" font-size="11" transform="rotate(-90 15 170)" text-anchor="middle">Classe Real</text>
+          </svg>
+        </div>
+        <div class="media-caption" style="color:#64748b;">Navegue nas abas para inspecionar os valores exatos de cada modelo</div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: FASE 4 - DIAGNÓSTICO DE ERROS & TRADE-OFFS -->
+    <section class="slide-card">
+      <div class="slide-info">
+        <div class="slide-tag"><span>05</span> // FASE 4: DIAGNÓSTICO DE ERROS</div>
+        <h2 class="slide-title">Conclusões Técnicas & Diagnóstico</h2>
+        <p class="slide-desc">
+          Análise dos limites morfológicos dos dígitos e trade-offs entre acurácia, latência e expressividade[cite: 1].
+        </p>
+
+        <ul class="metric-list">
+          <li class="metric-item">
+            <span class="bullet">4 vs 9</span>
+            <span><strong>Conflito de Traço:</strong> Fechamento superior incompleto confunde os modelos com facilidade[cite: 1].</span>
+          </li>
+          <li class="metric-item">
+            <span class="bullet">3 vs 5</span>
+            <span><strong>Curvatura:</strong> Ambiguidades estruturais em caligrafias manuais afetam fronteiras lineares[cite: 1].</span>
+          </li>
+          <li class="metric-item">
+            <span class="bullet">O(N²)</span>
+            <span><strong>Complexidade:</strong> SVM escala quadraticamente com o número de amostras, enquanto MLP oferece flexibilidade e RF garante velocidade[cite: 1].</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="media-panel">
+        <!-- SVG Idêntico aos Cards 11.png e 12.png -->
+        <svg viewBox="0 0 480 320" xmlns="http://www.w3.org/2000/svg">
+          <rect width="480" height="320" rx="16" fill="#0c1220"/>
+          <text x="24" y="30" fill="#9d4edd" font-family="'Plus Jakarta Sans'" font-size="15" font-weight="800">Conclusões Técnicas: Desempenho e Diagnóstico</text>
+
+          <!-- Card 1 -->
+          <rect x="20" y="50" width="210" height="110" rx="8" fill="#111a2e" stroke="#1f2d4a"/>
+          <circle cx="125" cy="50" r="11" fill="#00d2ff"/>
+          <text x="125" y="54" fill="#000" font-size="10" font-weight="bold" text-anchor="middle">1</text>
+          <text x="30" y="78" fill="#fff" font-size="10" font-weight="bold">Dígitos Similares</text>
+          <text x="30" y="96" fill="#94a3b8" font-size="8">Erros comuns em 4 vs 9, 3 vs 5</text>
+          <text x="30" y="110" fill="#94a3b8" font-size="8">e 3 vs 8 com traços e curvas</text>
+          <text x="30" y="124" fill="#94a3b8" font-size="8">morfologicamente próximos.</text>
+
+          <!-- Card 2 -->
+          <rect x="250" y="50" width="210" height="110" rx="8" fill="#111a2e" stroke="#1f2d4a"/>
+          <circle cx="355" cy="50" r="11" fill="#00d2ff"/>
+          <text x="355" y="54" fill="#000" font-size="10" font-weight="bold" text-anchor="middle">2</text>
+          <text x="260" y="78" fill="#fff" font-size="10" font-weight="bold">MLP: Expressividade</text>
+          <text x="260" y="96" fill="#94a3b8" font-size="8">Captura relações não-lineares</text>
+          <text x="260" y="110" fill="#94a3b8" font-size="8">com flexibilidade, demandando</text>
+          <text x="260" y="124" fill="#94a3b8" font-size="8">maior ajuste de parâmetros.</text>
+
+          <!-- Card 3 -->
+          <rect x="20" y="175" width="210" height="105" rx="8" fill="#111a2e" stroke="#1f2d4a"/>
+          <circle cx="125" cy="175" r="11" fill="#00d2ff"/>
+          <text x="125" y="179" fill="#000" font-size="10" font-weight="bold" text-anchor="middle">3</text>
+          <text x="30" y="202" fill="#fff" font-size="10" font-weight="bold">SVM: Generalização</text>
+          <text x="30" y="220" fill="#94a3b8" font-size="8">Alto desempenho preditivo com</text>
+          <text x="30" y="234" fill="#94a3b8" font-size="8">menor flexibilidade dimensional</text>
+          <text x="30" y="248" fill="#94a3b8" font-size="8">do que redes profundas.</text>
+
+          <!-- Card 4 -->
+          <rect x="250" y="175" width="210" height="105" rx="8" fill="#111a2e" stroke="#1f2d4a"/>
+          <circle cx="355" cy="175" r="11" fill="#00d2ff"/>
+          <text x="355" y="179" fill="#000" font-size="10" font-weight="bold" text-anchor="middle">4</text>
+          <text x="260" y="202" fill="#fff" font-size="10" font-weight="bold">Random Forest</text>
+          <text x="260" y="220" fill="#94a3b8" font-size="8">Comportamento estável e rápido,</text>
+          <text x="260" y="234" fill="#94a3b8" font-size="8">porém com menor finesse em</text>
+          <text x="260" y="248" fill="#94a3b8" font-size="8">fronteiras de decisão finas.</text>
+
+          <!-- Barra Conclusiva -->
+          <rect x="20" y="290" width="440" height="22" rx="4" fill="#0f2b48"/>
+          <text x="240" y="304" fill="#00d2ff" font-size="8" text-anchor="middle">Veredito: o modelo ideal equilibra acurácia, custo computacional, robustez e interpretabilidade.</text>
+        </svg>
+        <div class="media-caption">painel_diagnostico_erros.svg [Integrado nativamente]</div>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: FASE 5 - GENERALIZAÇÃO & ROBUSTEZ OOD -->
+    <section class="slide-card">
+      <div class="slide-info">
+        <div class="slide-tag"><span>06</span> // FASE 5: GENERALIZAÇÃO & OOD</div>
+        <h2 class="slide-title">Estresse OOD & Classes Ocultadas</h2>
+        <p class="slide-desc">
+          Avaliação do comportamento do modelo diante de premissas fora da distribuição ideal de treinamento (Out-of-Distribution)[cite: 1].
+        </p>
+
+        <ul class="metric-list">
+          <li class="metric-item">
+            <span class="bullet">5.1</span>
+            <span><strong>Class Masking:</strong> Treinamento omitindo intencionalmente os dígitos 4 e 7[cite: 1].</span>
+          </li>
+          <li class="metric-item">
+            <span class="bullet">5.2</span>
+            <span><strong>Inferência OOD:</strong> Submissão das classes ocultadas para avaliar a sobreconfiança (falsa certeza) do modelo[cite: 1].</span>
+          </li>
+          <li class="metric-item">
+            <span class="bullet">5.3</span>
+            <span><strong>Resultado:</strong> Dispersão controlada de entropia útil para rejeição de amostras desconhecidas[cite: 1].</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="media-panel">
+        <!-- SVG Idêntico ao Card 8.png -->
+        <svg viewBox="0 0 480 310" xmlns="http://www.w3.org/2000/svg">
+          <rect width="480" height="310" rx="16" fill="#0c1322"/>
+          <text x="24" y="30" fill="#00d2ff" font-family="'Fira Code'" font-size="10" font-weight="bold">FASE 5 — ROBUSTEZ</text>
+          <text x="24" y="56" fill="#fff" font-family="'Plus Jakarta Sans'" font-size="17" font-weight="800">Testes de Robustez e Generalização Extrema</text>
+
+          <!-- Card Desafio A -->
+          <rect x="20" y="75" width="135" height="215" rx="8" fill="#111c33" stroke="#0055ff"/>
+          <circle cx="87" cy="100" r="14" fill="rgba(0, 102, 255, 0.2)" stroke="#00d2ff"/>
+          <text x="87" y="104" fill="#00d2ff" font-size="11" text-anchor="middle">&#128065;</text>
+          <text x="30" y="130" fill="#fff" font-size="10.5" font-weight="bold">Desafio A</text>
+          <text x="30" y="145" fill="#00d2ff" font-size="9">Class Masking</text>
+          <text x="30" y="168" fill="#94a3b8" font-size="8">Ocultar 2+ classes</text>
+          <text x="30" y="180" fill="#94a3b8" font-size="8">(dígitos 4 e 7).</text>
+          <text x="30" y="205" fill="#fff" font-size="8.5" font-weight="bold">Resultado:</text>
+          <text x="30" y="220" fill="#94a3b8" font-size="8">Manteve a separação</text>
+          <text x="30" y="232" fill="#94a3b8" font-size="8">das classes restantes</text>
+          <text x="30" y="244" fill="#94a3b8" font-size="8">sem colapso geral.</text>
+
+          <!-- Card Desafio B -->
+          <rect x="170" y="75" width="135" height="215" rx="8" fill="#111c33" stroke="#9d4edd"/>
+          <circle cx="237" cy="100" r="14" fill="rgba(157, 78, 221, 0.2)" stroke="#9d4edd"/>
+          <text x="237" y="104" fill="#9d4edd" font-size="11" text-anchor="middle">!</text>
+          <text x="180" y="130" fill="#fff" font-size="10.5" font-weight="bold">Desafio B</text>
+          <text x="180" y="145" fill="#9d4edd" font-size="9">OOD Inference</text>
+          <text x="180" y="168" fill="#94a3b8" font-size="8">Testar com classes</text>
+          <text x="180" y="180" fill="#94a3b8" font-size="8">nunca antes vistas.</text>
+          <text x="180" y="205" fill="#fff" font-size="8.5" font-weight="bold">Resultado:</text>
+          <text x="180" y="220" fill="#94a3b8" font-size="8">Predição com baixa</text>
+          <text x="180" y="232" fill="#94a3b8" font-size="8">confiança, provando</text>
+          <text x="180" y="244" fill="#94a3b8" font-size="8">detecção de novidade.</text>
+
+          <!-- Card Desafio C -->
+          <rect x="320" y="75" width="140" height="215" rx="8" fill="#111c33" stroke="#00f5d4"/>
+          <circle cx="390" cy="100" r="14" fill="rgba(0, 245, 212, 0.2)" stroke="#00f5d4"/>
+          <text x="390" y="104" fill="#00f5d4" font-size="11" text-anchor="middle">&#128247;</text>
+          <text x="330" y="130" fill="#fff" font-size="10.5" font-weight="bold">Desafio C</text>
+          <text x="330" y="145" fill="#00f5d4" font-size="9">Imagens Próprias</text>
+          <text x="330" y="168" fill="#94a3b8" font-size="8">Pré-processamento:</text>
+          <text x="330" y="180" fill="#94a3b8" font-size="8">cinza, inversão e resize.</text>
+          <text x="330" y="205" fill="#fff" font-size="8.5" font-weight="bold">Resultado:</text>
+          <text x="330" y="220" fill="#94a3b8" font-size="8">Dígito manuscrito</text>
+          <text x="330" y="232" fill="#94a3b8" font-size="8">classificado com alta</text>
+          <text x="330" y="244" fill="#94a3b8" font-size="8">generalização real.</text>
+        </svg>
+        <div class="media-caption">estresse_ood_generalizacao.svg [Integrado nativamente]</div>
+      </div>
+    </section>
+
+    <!-- SLIDE 7: FASE 5.3 - VALIDAÇÃO NO MUNDO REAL (DÍGITO 0) -->
+    <section class="slide-card">
+      <div class="slide-info">
+        <div class="slide-tag"><span>07</span> // FASE 5.3: REAL WORLD INFERENCE</div>
+        <h2 class="slide-title">Dígito Manuscrito Próprio</h2>
+        <p class="slide-desc">
+          Pipeline de Visão Computacional com imagem capturada no mundo real, inversão binária e validação estocástica[cite: 1].
+        </p>
+
+        <div class="code-box">
+          <span class="com"># Pipeline OpenCV: Mundo Real &rarr; Modelo</span><br>
+          gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)<br>
+          inverted = cv2.bitwise_not(gray)<br>
+          sample = cv2.resize(inverted, (<span class="num">28</span>, <span class="num">28</span>)) / <span class="num">255.0</span>
+        </div>
+
+        <ul class="metric-list">
+          <li class="metric-item">
+            <span class="bullet">PRED</span>
+            <span><strong>Predição Correta:</strong> Reconhecimento robusto do dígito manuscrito com alta probabilidade na classe prevista[cite: 1].</span>
+          </li>
+          <li class="metric-item">
+            <span class="bullet">CONF</span>
+            <span>O modelo preservou a separabilidade geométrica mesmo sob caligrafia externa.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="media-panel">
+        <!-- SVG Idêntico aos Prints 9.jpg e 10.jpg -->
+        <svg viewBox="0 0 480 300" xmlns="http://www.w3.org/2000/svg">
+          <rect width="480" height="300" rx="16" fill="#090e1b"/>
+          <text x="24" y="28" fill="#fff" font-family="'Plus Jakarta Sans'" font-size="14" font-weight="bold">Teste público com imagens manuscritas</text>
+
+          <!-- Ilustração Isométrica do Dígito 0 -->
+          <g transform="translate(40, 60)">
+            <polygon points="80,10 150,45 80,80 10,45" fill="#f1f5f9" opacity="0.95"/>
+            <polygon points="10,45 80,80 80,95 10,60" fill="#94a3b8"/>
+            <polygon points="80,80 150,45 150,60 80,95" fill="#cbd5e1"/>
+            <!-- Dígito 0 3D Azul -->
+            <ellipse cx="80" cy="45" rx="35" ry="50" fill="#00d2ff" stroke="#0077ff" stroke-width="4"/>
+            <ellipse cx="80" cy="45" rx="16" ry="26" fill="#f1f5f9"/>
+          </g>
+
+          <!-- Diagnóstico Técnico -->
+          <g transform="translate(220, 55)">
+            <text x="0" y="20" fill="#fff" font-size="12" font-weight="bold">Exemplo OOD: dígito manuscrito 0</text>
+
+            <circle cx="5" cy="45" r="3" fill="#00d2ff"/>
+            <text x="16" y="48" fill="#e2e8f0" font-size="10.5">Predição: <tspan fill="#00f5d4" font-weight="bold">0</tspan></text>
+
+            <circle cx="5" cy="70" r="3" fill="#00d2ff"/>
+            <text x="16" y="73" fill="#e2e8f0" font-size="10.5">Confiança: <tspan fill="#fff" font-weight="bold">alta na classe prevista</tspan></text>
+
+            <circle cx="5" cy="95" r="3" fill="#00d2ff"/>
+            <text x="16" y="98" fill="#94a3b8" font-size="9.5">
+              <tspan x="16" dy="0">Leitura geral: o modelo reconheceu</tspan>
+              <tspan x="16" dy="14">corretamente o formato e manteve</tspan>
+              <tspan x="16" dy="14">robustez fora do conjunto de treino.</tspan>
+            </text>
+
+            <rect x="0" y="150" width="230" height="70" rx="6" fill="#111c33" stroke="#1f2d4a"/>
+            <text x="10" y="172" fill="#fff" font-size="9" font-weight="bold">Saída do teste:</text>
+            <text x="10" y="190" fill="#94a3b8" font-size="8">Previsões consistentes nas imagens</text>
+            <text x="10" y="204" fill="#94a3b8" font-size="8">manuscritas, validando generalização extrema.</text>
+          </g>
+        </svg>
+        <div class="media-caption">teste_manuscrito_zero.svg [Integrado nativamente]</div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Alterna visualização das matrizes no Slide 4 sem recarregar tela
+    function switchMatrixView(id, btn) {
+      document.querySelectorAll('.matrix-svg-view').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+      const target = document.getElementById('view-' + id);
+      if (target) target.classList.add('active');
+      btn.classList.add('active');
+    }
+  </script>
+
+</body>
+</html>
