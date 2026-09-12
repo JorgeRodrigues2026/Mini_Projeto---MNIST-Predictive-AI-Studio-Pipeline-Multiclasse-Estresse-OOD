@@ -49,7 +49,7 @@ Sistema preditivo completo de ponta a ponta desenvolvido em Python, com interfac
 
 ### 1. Clonar o Repositório e Criar Ambiente Virtual
 ```bash
-git clone https://github.com/SEU_USUARIO/mnist-predictive-ai-studio.git
+git clone https://github.com/jorgerodroigues2026/mnist-predictive-ai-studio.git
 cd mnist-predictive-ai-studio
 
 python -m venv venv
@@ -83,10 +83,50 @@ Apresentação técnica com dashboard interativo em glassmorphism moderno, conso
 
 ---
 
-### 🧪 Testes de Estresse, Robustez & Generalização Extrema (Fase 5)[cite: 1]
+### 🧪 Testes de Estresse, Robustez & Generalização Extrema (Fase 5).
 
-* **Fase 5.1 — Class Masking:** Treinamento restrito suprimindo intencionalmente os dígitos 4 e 7[cite: 1].
-* **Fase 5.2 — Inferência OOD & Overconfidence:** Validação da resiliência preditiva sobre classes nunca vistas durante o ajuste de pesos[cite: 1]. A dispersão entrópica evitou falsas certezas absolutas, demonstrando capacidade de detecção de novidade[cite: 1].
-* **Fase 5.3 — Inferência com Imagens Próprias (OpenCV):** Digitalização e pipeline de pré-processamento (escala de cinza, inversão bitwise, reenquadramento de centro de massa e normalização para $[0.0, 1.0]$), resultando na classificação correta e consistente do traço manuscrito[cite: 1].
+* **Fase 5.1 — Class Masking:** Treinamento restrito suprimindo intencionalmente os dígitos 4 e 7.
+
+* **Fase 5.2 — Inferência OOD & Overconfidence:** Validação da resiliência preditiva sobre classes nunca vistas durante o ajuste de pesos. A dispersão entrópica evitou falsas certezas absolutas, demonstrando capacidade de detecção de novidade.
+
+* **Fase 5.3 — Inferência com Imagens Próprias (OpenCV):** Digitalização e pipeline de pré-processamento (escala de cinza, inversão bitwise, reenquadramento de centro de massa e normalização para $[0.0, 1.0]$), resultando na classificação correta e consistente do traço manuscrito.
 
 ---
+
+Fase 5 — Testes de Robustez e Generalização Extrema
+
+Desafio A — Class Masking
+
+Treinar o modelo ocultando 2+ classes (ex: dígitos 4 e 7). Como o classificador reage à ausência de categorias inteiras?
+
+Resultado: o modelo manteve a separação das classes restantes, sem colapso geral do desempenho.
+
+Desafio B — OOD Inference
+
+Testar com classes nunca vistas durante o treino. Análise de "falsa certeza" — o modelo deve reconhecer o que não sabe.
+
+Resultado: no teste OOD com o dígito 0, o modelo indicou a classe mais provável com baixa confiança relativa, evidenciando incerteza útil para detecção de novidade.
+
+Desafio C — Imagens Próprias
+
+Pré-processamento customizado: conversão para escala de cinza, inversão e resize 28×28. Predição sobre dígitos reais do mundo.
+
+Resultado: imagens manuscritas do teste público foram classificadas corretamente após o pré-processamento, confirmando generalização para escrita real.
+
+Teste público com imagens manuscritas
+
+Exemplo OOD: dígito manuscrito 0
+
+Predição: 0
+Confiança: alta na classe prevista
+Leitura geral: o modelo reconheceu corretamente o formato e manteve robustez em imagem fora do conjunto de treino.
+
+
+### 🧪 Conclusão Técnica e Diagnóstico de Erros
+
+Pares com maior taxa de confusão: Dígitos morfologicamente semelhantes, tais como 4 vs 9 (desvio ao fechamento superior do traço), 3 vs 5 e 7 vs 1.
+
+Trade-off Computacional:
+
+O modelo MLP (rede neural) e o SVM RBF obtêm a maior acurácia global e F1-score (~97-98%), porém SVM escala quadraticamente O(N²) com o número de amostras no treinamento.
+O Random Forest oferece excelente paralelização e inferência ultra-rápida, mas apresenta menor redução em fronteiras de decisão complexas de pixels adjacentes.
