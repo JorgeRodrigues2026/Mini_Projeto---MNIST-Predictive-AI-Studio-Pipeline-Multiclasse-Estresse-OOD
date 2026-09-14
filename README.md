@@ -49,8 +49,9 @@ Sistema preditivo completo de ponta a ponta desenvolvido em Python, com interfac
 
 ### 1. Clonar o Repositório e Criar Ambiente Virtual
 ```bash
-git clone https://github.com/jorgerodroigues2026/mnist-predictive-ai-studio.git
+git clone https://github.com/JorgeRodrigues2026/Mini_Projeto---MNIST-Predictive-AI-Studio-Pipeline-Multiclasse-Estresse-OOD.git
 cd mnist-predictive-ai-studio
+
 
 python -m venv venv
 # No Windows:
@@ -64,8 +65,11 @@ source venv/bin/activate
 
 Apresentação técnica com dashboard interativo em glassmorphism moderno, consolidando a análise exploratória de dados, benchmarks comparativos e os testes de estresse OOD:
 
-* 🌐 **Acessar Apresentação Online:** [Visualizar Apresentação Interativa (GitHub Pages)](https://jorgerodrigues2026.github.io/Mini_Projeto---MNIST-Predictive-AI-Studio-Pipeline-Multiclasse-Estresse-OOD/)
-* 🎥 **Vídeo Explicativo do Projeto (Drive):** `[INSERIR_AQUI_O_LINK_DO_SEU_GOOGLE_DRIVE]`
+* 🌐 **Acessar Apresentação Online:** [Visualizar Apresentação Interativa (GitHub Pages)]
+(https://jorgerodrigues2026.github.io/Mini_Projeto---MNIST-Predictive-AI-Studio-Pipeline-Multiclasse-Estresse-OOD/)
+
+* 🎥 **Vídeo Explicativo do Projeto (Drive):** 
+`[https://drive.google.com/file/d/1Sv6-uaSCgS3LQNjtWyNAecIh90tpqfT8/view?usp=drive_link]`
 
 ---
 
